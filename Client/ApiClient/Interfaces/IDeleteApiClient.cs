@@ -1,3 +1,5 @@
+namespace apiservice_consumer_with_bearer.Client.ApiClient.Interfaces;
+
 /// <summary>
 /// Interface responsável por executar requisições HTTP DELETE com suporte a envio de conteúdo e autenticação.
 /// </summary>
@@ -12,5 +14,5 @@ public interface IDeleteApiClient
     /// <returns>
     /// Um <see cref="Task{TResult}"/> que representa a operação assíncrona. O resultado será o corpo da resposta como uma <see cref="string"/>, ou <c>null</c> em caso de falha.
     /// </returns>
-    Task<string> DeleteAsync(string path, StringContent content, string token = null);
+    Task<string?> DeleteAsync(string path, string? content, string? token = null);
 }

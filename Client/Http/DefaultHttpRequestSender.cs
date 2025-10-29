@@ -1,3 +1,5 @@
+namespace apiservice_consumer_with_bearer.Client.Http;
+
 /// <summary>
 /// Define o contrato para enviar requisições HTTP com suporte a tempo de expiração (timeout).
 /// </summary>
@@ -23,19 +25,12 @@ public interface IHttpRequestSender
 /// A classe <see cref="DefaultHttpRequestSender"/> é responsável por enviar requisições HTTP assíncronas utilizando o cliente HTTP fornecido.
 /// Ela também suporta a definição de um tempo limite (timeout) para as requisições, cancelando a operação se o tempo expirar.
 /// </remarks>
-public class DefaultHttpRequestSender : IHttpRequestSender
+/// <remarks>
+/// Constrói uma instância do sender de requisições HTTP utilizando o cliente HTTP fornecido.
+/// </remarks>
+/// <param name="httpClient">Instância do <see cref="IHttpClient"/> a ser utilizada para enviar as requisições.</param>
+public class DefaultHttpRequestSender(IHttpClient httpClient) : IHttpRequestSender
 {
-    private readonly IHttpClient _httpClient;
-
-    /// <summary>
-    /// Constrói uma instância do sender de requisições HTTP utilizando o cliente HTTP fornecido.
-    /// </summary>
-    /// <param name="httpClient">Instância do <see cref="IHttpClient"/> a ser utilizada para enviar as requisições.</param>
-    public DefaultHttpRequestSender(IHttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
     /// <summary>
     /// Envia uma requisição HTTP assíncrona e retorna a resposta, com suporte a tempo limite (timeout) opcional.
     /// </summary>
@@ -46,12 +41,10 @@ public class DefaultHttpRequestSender : IHttpRequestSender
     {
         if (timeout.HasValue)
         {
-            using (var cts = new CancellationTokenSource(timeout.Value))
-            {
-                return await _httpClient.SendAsync(request, cts.Token).ConfigureAwait(false);
-            }
+            using var cts = new CancellationTokenSource(timeout.Value);
+            return await httpClient.SendAsync(request, cts.Token).ConfigureAwait(false);
         }
 
-        return await _httpClient.SendAsync(request).ConfigureAwait(false);
+        return await httpClient.SendAsync(request).ConfigureAwait(false);
     }
 }

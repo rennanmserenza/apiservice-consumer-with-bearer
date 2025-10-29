@@ -1,3 +1,7 @@
+using System.Net.Http.Headers;
+
+namespace apiservice_consumer_with_bearer.Client.Authorization;
+
 /// <summary>
 /// Define o contrato para manipulação de cabeçalhos de autorização em requisições HTTP.
 /// </summary>
@@ -12,7 +16,7 @@ public interface IAuthorizationHeaderHandler
     /// </summary>
     /// <param name="request">A requisição HTTP à qual o cabeçalho de autorização será adicionado.</param>
     /// <param name="token">O token de autenticação (Bearer) que será adicionado ao cabeçalho de autorização. Pode ser nulo ou vazio.</param>
-    void AddAuthorizationHeader(HttpRequestMessage request, string token);
+    void AddAuthorizationHeader(HttpRequestMessage request, string? token);
 }
 
 /// <summary>
@@ -25,17 +29,11 @@ public interface IAuthorizationHeaderHandler
 /// </remarks>
 public class AuthorizationHeaderHandler : IAuthorizationHeaderHandler
 {
-    public void AddAuthorizationHeader(HttpRequestMessage request, string token)
+    public void AddAuthorizationHeader(HttpRequestMessage request, string? token)
     {
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-            // Adiciona o cabeçalho de autorização com o token Bearer
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        }
-        else
-        {
-            // Se o token não for válido, remove o cabeçalho de autorização
-            request.Headers.Authorization = null;
-        }
+        // Adiciona o cabeçalho de autorização com o token Bearer
+        request.Headers.Authorization = !string.IsNullOrWhiteSpace(token) 
+            ? new AuthenticationHeaderValue("Bearer", token) 
+            : null;
     }
 }

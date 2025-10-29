@@ -1,3 +1,5 @@
+namespace apiservice_consumer_with_bearer.Client.Authorization;
+
 /// <summary>
 /// Define o contrato para gerenciar a adição de cabeçalhos de autorização em requisições HTTP.
 /// </summary>
@@ -14,7 +16,7 @@ public interface IAuthorizationManager
     /// <param name="request">A requisição HTTP à qual o cabeçalho de autorização será adicionado.</param>
     /// <param name="token">O token de autenticação (Bearer) que será adicionado ao cabeçalho de autorização.</param>
     /// <exception cref="ArgumentNullException">Lançado se o token for nulo ou vazio.</exception>
-    void AddAuthorizationHeader(HttpRequestMessage request, string token);
+    void AddAuthorizationHeader(HttpRequestMessage request, string? token);
 }
 
 /// <summary>
@@ -25,27 +27,20 @@ public interface IAuthorizationManager
 /// a responsabilidade para um manipulador específico de cabeçalhos de autorização. Caso o token seja inválido, ela lança
 /// uma exceção para garantir que apenas tokens válidos sejam utilizados nas requisições.
 /// </remarks>
-public class AuthorizationManager : IAuthorizationManager
+/// <remarks>
+/// Constrói uma instância do gerenciador de cabeçalhos de autorização.
+/// </remarks>
+/// <param name="authorizationHeaderHandler">Instância do manipulador de cabeçalhos de autorização.</param>
+public class AuthorizationManager(IAuthorizationHeaderHandler authorizationHeaderHandler) : IAuthorizationManager
 {
-    private readonly IAuthorizationHeaderHandler _authorizationHeaderHandler;
-
-    /// <summary>
-    /// Constrói uma instância do gerenciador de cabeçalhos de autorização.
-    /// </summary>
-    /// <param name="authorizationHeaderHandler">Instância do manipulador de cabeçalhos de autorização.</param>
-    public AuthorizationManager(IAuthorizationHeaderHandler authorizationHeaderHandler)
-    {
-        _authorizationHeaderHandler = authorizationHeaderHandler;
-    }
-
     /// <summary>
     /// Adiciona o cabeçalho de autorização "Bearer" a uma requisição HTTP.
     /// </summary>
     /// <param name="request">A requisição HTTP à qual o cabeçalho de autorização será adicionado.</param>
     /// <param name="token">O token de autenticação (Bearer) que será adicionado ao cabeçalho de autorização.</param>
     /// <exception cref="ArgumentNullException">Lançado se o token for nulo ou vazio.</exception>
-    public void AddAuthorizationHeader(HttpRequestMessage request, string token)
+    public void AddAuthorizationHeader(HttpRequestMessage request, string? token)
     {
-        _authorizationHeaderHandler.AddAuthorizationHeader(request, token);
+        authorizationHeaderHandler.AddAuthorizationHeader(request, token);
     }
 }

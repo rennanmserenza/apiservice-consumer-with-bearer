@@ -1,3 +1,5 @@
+namespace apiservice_consumer_with_bearer.Client.Http;
+
 /// <summary>
 /// Define o contrato para enviar requisições HTTP assíncronas.
 /// </summary>
@@ -31,26 +33,19 @@ public interface IHttpClient
 /// Ela expõe métodos assíncronos para enviar requisições, com suporte a cancelamento via <see cref="CancellationToken"/>.
 /// Esta classe pode ser facilmente substituída em testes ou em cenários onde seja necessário customizar o comportamento das requisições HTTP.
 /// </remarks>
-public class DefaultHttpClient : IHttpClient
+/// <remarks>
+/// Constrói uma instância do cliente HTTP utilizando um <see cref="HttpClient"/> existente.
+/// </remarks>
+/// <param name="httpClient">Instância de <see cref="HttpClient"/> para enviar as requisições.</param>
+public class DefaultHttpClient(HttpClient httpClient) : IHttpClient
 {
-    private readonly HttpClient _httpClient;
-
-    /// <summary>
-    /// Constrói uma instância do cliente HTTP utilizando um <see cref="HttpClient"/> existente.
-    /// </summary>
-    /// <param name="httpClient">Instância de <see cref="HttpClient"/> para enviar as requisições.</param>
-    public DefaultHttpClient(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-    }
-
     /// <summary>
     /// Envia uma requisição HTTP assíncrona e retorna a resposta.
     /// </summary>
     /// <param name="request">A requisição HTTP a ser enviada.</param>
     /// <returns>Uma tarefa representando a operação assíncrona, com a resposta da requisição.</returns>
     public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
-        => _httpClient.SendAsync(request);
+        => httpClient.SendAsync(request);
 
     /// <summary>
     /// Envia uma requisição HTTP assíncrona e retorna a resposta, com suporte ao token de cancelamento.
@@ -59,5 +54,5 @@ public class DefaultHttpClient : IHttpClient
     /// <param name="cancellationToken">Um token que pode ser usado para cancelar a requisição.</param>
     /// <returns>Uma tarefa representando a operação assíncrona, com a resposta da requisição.</returns>
     public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
-        => _httpClient.SendAsync(request, cancellationToken);
+        => httpClient.SendAsync(request, cancellationToken);
 }

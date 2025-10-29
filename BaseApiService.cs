@@ -1,3 +1,8 @@
+using apiservice_consumer_with_bearer.Authentication.TokenHandling;
+using apiservice_consumer_with_bearer.Client.ApiClient.Interfaces;
+
+namespace apiservice_consumer_with_bearer;
+
 /// <summary>
 /// Interface que define operações básicas de comunicação com APIs via HTTP (GET, POST e DELETE),
 /// com suporte ao envio de conteúdo no corpo da requisição.
@@ -11,7 +16,7 @@ public interface IBaseApiService
     /// <returns>
     /// Um <see cref="Task{TResult}"/> que representa a operação assíncrona. O resultado será o corpo da resposta como uma <see cref="string"/>, ou <c>null</c> em caso de falha.
     /// </returns>
-    Task<string> GetAsync(string path);
+    Task<string?> GetAsync(string path);
 
     /// <summary>
     /// Envia uma requisição HTTP POST para o endpoint especificado, com o conteúdo fornecido.
@@ -21,7 +26,7 @@ public interface IBaseApiService
     /// <returns>
     /// Um <see cref="Task{TResult}"/> que representa a operação assíncrona. O resultado será o corpo da resposta como uma <see cref="string"/>, ou <c>null</c> em caso de falha.
     /// </returns>
-    Task<string> PostAsync(string path, string content);
+    Task<string?> PostAsync(string path, string? content);
 
     /// <summary>
     /// Envia uma requisição HTTP do tipo POST para o endpoint especificado com o conteúdo fornecido, um tempo de timeout e o token de autenticação.
@@ -38,7 +43,7 @@ public interface IBaseApiService
     /// O token é então passado para o método `PostRawAsync` da instância de <see cref="_apiClient"/>. 
     /// A requisição será cancelada se o tempo limite (timeout) for atingido.
     /// </remarks>
-    Task<HttpResponseMessage> PostRawAsync(string path, string content, TimeSpan timeOut);
+    Task<HttpResponseMessage?> PostRawAsync(string path, string? content, TimeSpan timeOut);
 
     /// <summary>
     /// Envia uma requisição HTTP DELETE para o endpoint especificado, com o conteúdo fornecido.
@@ -48,7 +53,7 @@ public interface IBaseApiService
     /// <returns>
     /// Um <see cref="Task{TResult}"/> que representa a operação assíncrona. O resultado será o corpo da resposta como uma <see cref="string"/>, ou <c>null</c> em caso de falha.
     /// </returns>
-    Task<string> DeleteAsync(string path, string content);
+    Task<string?> DeleteAsync(string path, string? content);
 }
 
 /// <summary>
@@ -57,60 +62,44 @@ public interface IBaseApiService
 /// <remarks>
 /// Esta classe utiliza um <see cref="ITokenService"/> para obter o token de autenticação e um <see cref="IApiClient"/> para realizar as requisições.
 /// </remarks>
-public abstract class BaseApiService : IBaseApiService
+/// <remarks>
+/// Inicializa uma nova instância de <see cref="BaseApiService"/> com os serviços de token e API client fornecidos.
+/// </remarks>
+/// <param name="tokenService">Serviço utilizado para obter o token de autenticação.</param>
+/// <param name="apiClient">Cliente utilizado para executar as requisições HTTP.</param>
+/// <exception cref="ArgumentNullException">Lançada se <paramref name="tokenService"/> ou <paramref name="apiClient"/> for <c>null</c>.</exception>
+public abstract class BaseApiService(ITokenService tokenService, IApiClient apiClient) : IBaseApiService
 {
-    /// <summary>
-    /// Serviço responsável por fornecer o token de autenticação.
-    /// </summary>
-    protected readonly ITokenService _tokenService;
-
-    /// <summary>
-    /// Cliente HTTP utilizado para enviar requisições à API.
-    /// </summary>
-    protected readonly IApiClient _apiClient;
-
-    /// <summary>
-    /// Inicializa uma nova instância de <see cref="BaseApiService"/> com os serviços de token e API client fornecidos.
-    /// </summary>
-    /// <param name="tokenService">Serviço utilizado para obter o token de autenticação.</param>
-    /// <param name="apiClient">Cliente utilizado para executar as requisições HTTP.</param>
-    /// <exception cref="ArgumentNullException">Lançada se <paramref name="tokenService"/> ou <paramref name="apiClient"/> for <c>null</c>.</exception>
-    public BaseApiService(ITokenService tokenService, IApiClient apiClient)
-    {
-        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
-        _apiClient = apiClient ?? throw new ArgumentNullException(nameof(apiClient));
-    }
-
     /// <summary>
     /// Obtém o token de autenticação atual.
     /// </summary>
     /// <returns>Token JWT como <see cref="string"/>.</returns>
     protected string GetAuthenticationToken()
     {
-        return _tokenService.ObterAutenticador();
+        return tokenService.ObterAutenticador();
     }
 
-    public async Task<string> GetAsync(string path)
+    public async Task<string?> GetAsync(string path)
     {
         string token = GetAuthenticationToken();
-        return await _apiClient.GetAsync(path, token);
+        return await apiClient.GetAsync(path, token);
     }
 
-    public async Task<string> PostAsync(string path, string content)
+    public async Task<string?> PostAsync(string path, string? content)
     {
         string token = GetAuthenticationToken();
-        return await _apiClient.PostAsync(path, content, token: token);
+        return await apiClient.PostAsync(path, content, token: token);
     }
 
-    public async Task<HttpResponseMessage> PostRawAsync(string path, string content, TimeSpan timeOut)
+    public async Task<HttpResponseMessage?> PostRawAsync(string path, string? content, TimeSpan timeOut)
     {
         string token = GetAuthenticationToken();
-        return await _apiClient.PostRawAsync(path, content, timeOut, token);
+        return await apiClient.PostRawAsync(path, content, timeOut, token);
     }
 
-    public async Task<string> DeleteAsync(string path, string content)
+    public async Task<string?> DeleteAsync(string path, string? content)
     {
         string token = GetAuthenticationToken();
-        return await _apiClient.DeleteAsync(path, content, token);
+        return await apiClient.DeleteAsync(path, content, token);
     }
 }

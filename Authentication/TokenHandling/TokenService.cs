@@ -1,3 +1,10 @@
+using apiservice_consumer_with_bearer.Client.ApiClient.Interfaces;
+using apiservice_consumer_with_bearer.Config;
+using apiservice_consumer_with_bearer.Extensions;
+using System.Net;
+
+namespace apiservice_consumer_with_bearer.Authentication.TokenHandling;
+
 public interface ITokenService
 {
     /// <summary>
@@ -13,17 +20,10 @@ public interface ITokenService
     string ObterAutenticador(TimeSpan? timeout = null);
 }
 
-public class TokenService : ITokenService
+public class TokenService(IApiClient apiClient, AppSettings appSettings) : ITokenService
 {
-    private readonly IApiClient _apiClient;
-    private readonly AppSettings _appSettings;
-
-    // Injeção de dependência
-    public TokenService(IApiClient apiClient, AppSettings appSettings)
-    {
-        _apiClient = apiClient ?? throw new ArgumentNullException(nameof(apiClient));
-        _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
-    }
+    private readonly IApiClient _apiClient = apiClient ?? throw new ArgumentNullException(nameof(apiClient));
+    private readonly AppSettings _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
 
     /// <summary>
     /// Prepara a URL completa e o conteúdo JSON a ser enviado em uma requisição HTTP.
@@ -35,15 +35,15 @@ public class TokenService : ITokenService
     ///   <item><description><c>content</c>: o conteúdo serializado no formato <see cref="StringContent"/> com codificação UTF-8.</description></item>
     /// </list>
     /// </returns>
-    private (string baseUrlToken, string content) BuildRequestData()
+    private (string baseUrlToken, string? content) BuildRequestData()
     {
         var autenticacaoRequest = new AutenticacaoRequest
         {
-            usuario = _appSettings.Usuario,
-            senha = _appSettings.Senha
+            Usuario = _appSettings.Usuario,
+            Senha = _appSettings.Senha
         };
 
-        string baseUrlToken = _appSettings.Uri + "/v1/Autenticacao";
+        string baseUrlToken = _appSettings.BaseUri + "/v1/Autenticacao";
         var content = autenticacaoRequest.FormatToJson();
 
         return (baseUrlToken, content);
@@ -53,10 +53,12 @@ public class TokenService : ITokenService
     {
         try
         {
-            (string baseUrlToken, string content) = BuildRequestData();
-            var token = _apiClient.PostAsync(baseUrlToken, content, timeOut).Result.Deserialize<TokenResponse>().Token;
+            (string baseUrlToken, string? content) = BuildRequestData();
+            var token = _apiClient
+                .PostAsync(baseUrlToken, content, timeout).Result
+                .FromJson<TokenResponse>()?.Token;
 
-            return token;
+            return token ?? string.Empty;
         }
         catch (WebException ex)
         {

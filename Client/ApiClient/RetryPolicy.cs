@@ -1,3 +1,8 @@
+using Polly;
+using Polly.Retry;
+
+namespace apiservice_consumer_with_bearer.Client.ApiClient;
+
 /// <summary>
 /// Interface para definir a política de retry para requisições HTTP.
 /// </summary>

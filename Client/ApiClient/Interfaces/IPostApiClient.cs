@@ -1,3 +1,5 @@
+namespace apiservice_consumer_with_bearer.Client.ApiClient.Interfaces;
+
 /// <summary>
 /// Interface responsável por executar requisições HTTP POST com suporte a envio de conteúdo e autenticação.
 /// </summary>
@@ -12,5 +14,7 @@ public interface IPostApiClient
     /// <returns>
     /// Um <see cref="Task{TResult}"/> que representa a operação assíncrona. O resultado será o corpo da resposta como uma <see cref="string"/>, ou <c>null</c> em caso de falha.
     /// </returns>
-    Task<string> PostAsync(string path, StringContent content, string token = null);
+    Task<string?> PostAsync(string path, string? content, TimeSpan? timeout = null, string? token = null);
+
+    Task<HttpResponseMessage?> PostRawAsync(string path, string? content, TimeSpan? timeout = null, string? token = null);
 }
