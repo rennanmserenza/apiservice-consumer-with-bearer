@@ -18,13 +18,13 @@ namespace apiservice_consumer_with_bearer.Client.ApiClient;
 /// <param name="retryPolicy">Instância de <see cref="IRetryPolicy"/> para gerenciar tentativas de repetição em caso de falhas temporárias nas requisições.</param>
 /// <param name="requestBuilder">Instância de <see cref="IRequestBuilder"/> para construir e configurar requisições HTTP, incluindo cabeçalhos de autorização e conteúdo.</param>
 /// <remarks>
-/// Este construtor inicializa o cliente HTTP com as dependências necessárias para enviar requisições com suporte a retry e 
+/// Este construtor inicializa o cliente HTTP com as dependências necessárias para enviar requisições com suporte a retry e
 /// construção personalizada das requisições, incluindo autenticação via token quando necessário.
 /// </remarks>
 public class ApiClient(
     IHttpRequestSender httpRequestSender,
     IRetryPolicy retryPolicy,
-    IRequestBuilder requestBuilder) 
+    IRequestBuilder requestBuilder)
     : IApiClient
 {
     public Task<string?> GetAsync(string path, string? token = null)
